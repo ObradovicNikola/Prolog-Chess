@@ -10,6 +10,9 @@ obrni(L,LO):-
     obrni1(L,LO,[]).
 obrni1([],LO,LO).
 obrni1([G|R],LO,A):-obrni1(R,LO,[G|A]).
+/*broj elem u listi*/
+count([],0).
+count([_|R],N) :- count(R,N1) , N is N1+1.
 /*ispisivanje table -red po red, svaki red element po element*/
 ispisiTablu([]):-!.
 ispisiTablu([G|R]):-
@@ -47,8 +50,7 @@ odigrajPotez(S,TSTARA,TNOVA, P):-
     nadjiIgraca(F2, P, F),
     nadjiKrajnjePolje(C2,ROWEND,COLEND,C3),
     nadjiPocetnoPolje(C3,F,ROWEND,COLEND,ROWSTART,COLSTART, P, TSTARA, C4, 0),
-    pomeriSaKrajnjegNaPocetnoPolje(TSTARA,ROWSTART,COLSTART,ROWEND,COLEND,TNOVA),
-    proveriUslove(C4,TSTARA,TNOVA).
+    pomeriSaKrajnjegNaPocetnoPolje(F, TSTARA,ROWSTART,COLSTART,ROWEND,COLEND,TNOVA, 8).
 /*nadjiFiguru- nalazi tip figure koji treba da se pomeri
   1)ako je prvo slovo notacije neka od figura nju pomeramo
   2)inace figura koja treba da se pomeri je pesak
@@ -127,3 +129,18 @@ mozeDaDodje('P',7,X,5,X).
 mozeDaDodje('P',ROWEND,COLEND,ROWSTART,COLSTART):-
     ROWS is ROWEND+1, ROWS=:=ROWSTART, R2 is COLEND-COLSTART,abs(R2)=<1.
 /*veliko slovo-upcase_atom(chstari,chnovi).*/ 
+
+pomeriSaKrajnjegNaPocetnoPolje(_,[],_,_,_,_,[],0):-!.
+pomeriSaKrajnjegNaPocetnoPolje(F, [G|R],ROWSTART,COLSTART,ROWEND,COLEND,[G1|R1], RED):- 
+                                  obidjiRed(G,G1,RED,1,F,ROWSTART,COLSTART,ROWEND,COLEND),
+                                  pomeriSaKrajnjegNaPocetnoPolje(F,R,ROWSTART,COLSTART,ROWEND,COLEND,R1, RED1),RED is RED1+1.
+obidjiRed([],[],_,9,_,_,_,_):-!.
+obidjiRed([G|R],[G1|R1],RED,KOLONA,F,ROWSTART,COLSTART,ROWEND,COLEND):-
+         proveriPocetno(RED,KOLONA,ROWSTART,COLSTART,G1,G),proveriKranje(F,RED,KOLONA,ROWEND,COLEND,G1,G),
+        obidjiRed(R,R1,RED,KOLONA1,F,ROWSTART,COLSTART,ROWEND,COLEND).
+proveriPocetno(RED,KOLONA,ROWSTART,COLSTART,'O',_):-
+    RED=:=ROWSTART,KOLONA=:=COLSTART,!.
+proveriPocetno(RED,KOLONA,ROWSTART,COLSTART,G,G).
+proveriKranje(F,RED,KOLONA,ROWEND,COLEND,F,_):-
+    RED=:=ROWEND,KOLONA=:=COLEND,!.
+proveriKranje(_,RED,KOLONA,ROWEND,COLEND,G,G).                    
