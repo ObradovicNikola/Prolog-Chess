@@ -51,7 +51,7 @@ odigrajPotez(S,TSTARA,TNOVA, P):-
     nadjiIgraca(F2, P, F),
     obrni(C2,C3),
     nadjiPolje(C3,ROWEND,COLEND,C4),/*krajnje polje*/
-    nadjiPocetnoPolje(C4,F,ROWEND,COLEND,ROWSTART,COLSTART, P, TSTARA, C5, 0),
+    nadjiPolje(C4,ROWSTART,COLSTART,_),/*pocetno polje(   treba menjati*/
     pomeriSaKrajnjegNaPocetnoPolje(F, TSTARA,ROWSTART,COLSTART,ROWEND,COLEND,TNOVA, 8).
 /*nadjiFiguru- nalazi tip figure koji treba da se pomeri
   1)ako je prvo slovo notacije neka od figura nju pomeramo
@@ -72,16 +72,8 @@ nadjiPolje([G|R],ROWEND,COLEND,R1):-nadjiPolje(R,ROWEND,COLEND,[G|R1]).
 pretvoriUBrojeve(BR,CH,COLEND,ROWEND):-
     char_code(CH,ROX),char_code('a',ROA),ROWEND is ROX-ROA+1,
     char_code(BR,COX),char_code('1',CO1),COLEND is COX-CO1+1.
-/* ocisti brise prvo ponavljanje odredjenog elementa u datoj listi*/
-ocisti(_, [], []).
-ocisti(X, [X|R], R) :- !.
-ocisti(X, [_|R], NL) :- ocisti(X, R, NL).
-/*nadjiPocetnoPolje*/
-nadjiPocetnoPolje(C3,F,ROWEND,COLEND,ROWSTART,COLSTART, P, TSTARA, C4, BR):- BR < 2,
-    			parsirajPocetnoPolje(C3, C5), nadjiKrajnjePolje1(C5, ROWSTART, COLEND).
-    	
-parsirajPocetnoPolje([G1, G2|R], [G2, G1]):-atom(G1), G1 =\= '+', G1 =\= '#', G1 =\='x', 
-    									atom(G2), G2 =\= '+', G2 =\= '#', G2 =\='x'.
+/*nadjiPocetnoPolje
+ * treba izmeniti- za sad isto sto i nadjiPolje*/
     
 /*okPotez- ako neka figura moze da dodje sa jednog polja na drugo, tako da je potez validan
  proveravamo da li figura moze da dodje na neko mesto i da li su pocetak i kraj razliciti*/
@@ -128,19 +120,11 @@ pomeriSaKrajnjegNaPocetnoPolje(_,[],_,_,_,_,[],0):-!.
 pomeriSaKrajnjegNaPocetnoPolje(F, [G|R],ROWSTART,COLSTART,ROWEND,COLEND,[G1|R1], RED):- 
                                   obidjiRed(G,G1,RED,1,F,ROWSTART,COLSTART,ROWEND,COLEND),
                                   pomeriSaKrajnjegNaPocetnoPolje(F,R,ROWSTART,COLSTART,ROWEND,COLEND,R1, RED1),RED is RED1+1.
-obidjiRed([],[],_,9,_,_,_,_):-!.
-obidjiRed([G|R],[G1|R1],RED,KOLONA,F,ROWSTART,COLSTART,ROWEND,COLEND):-
-         proveriPocetno(RED,KOLONA,ROWSTART,COLSTART,G1,G),proveriKranje(F,RED,KOLONA,ROWEND,COLEND,G1,G),
-        obidjiRed(R,R1,RED,KOLONA1,F,ROWSTART,COLSTART,ROWEND,COLEND),KOLONA1 is KOLONA+1.
-/*proveriPocetno-tokom prolaska kroz tablu proverava da li je trenutno polje pocetno
-                  1) ako jeste pise 'O' na tom mestu
-                  2) ako nije pise ono sto je bilo u pocetnoj tabeli*/
-proveriPocetno(RED,KOLONA,ROWSTART,COLSTART,'O',_):-
-    RED=:=ROWSTART,KOLONA=:=COLSTART,!.
-proveriPocetno(RED,KOLONA,ROWSTART,COLSTART,G,G).
-/*proveriKrajnje-tokom prolaska kroz tablu proverava da li je trenutno polje krajnje
-                  1) ako jeste pise slovo fi na tom mestu
-                  2) ako nije pise ono sto je bilo u pocetnoj tabeli*/
-proveriKranje(F,RED,KOLONA,ROWEND,COLEND,F,_):-
-    RED=:=ROWEND,KOLONA=:=COLEND,!.
-proveriKranje(_,RED,KOLONA,ROWEND,COLEND,G,G).
+obidjiRed([],[],_,9,_,_,_,_,_):-!.
+obidjiRed([G|R], [G1|R1], RED, KOLONA, F, ROWSTART,COLSTART,ROWEND,COLEND):-
+    proveriPocetnoIliKrajnje(F, RED, KOLONA, ROWSTART, COLSTART, ROWEND, COLEND, G, G1),
+    KOLONA1 is KOLONA+1, obidjiRed(R, R1, RED, KOLONA1, F, ROWSTART,COLSTART,ROWEND,COLEND).
+
+proveriPocetnoIliKrajnje(_, RED, KOLONA, RED, KOLONA, _, _, _, 'O'):-!.
+proveriPocetnoIliKrajnje(F, RED, KOLONA, _, _, RED, KOLONA, _, F):-!.
+proveriPocetnoIliKrajnje(_, _, _, _, _, _, _, G, G).
