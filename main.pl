@@ -79,32 +79,37 @@ pretvoriUBrojeve(BR,CH,COLEND,ROWEND):-
 /*okPotez- ako neka figura moze da dodje sa jednog polja na drugo, tako da je potez validan
  proveravamo da li figura moze da dodje na neko mesto i da li su pocetak i kraj razliciti*/
 okPotez(F,ROWSTART,COLSTART,ROWEND,COLEND):-
-    (ROWEND=\=ROWSTART;COLEND=\=COLSTART), format('figura je:~a\n',[F]),
+    (ROWEND=\=ROWSTART;COLEND=\=COLSTART), %format('figura je:~a\n a polja ~a ~a ~a ~a',[F,ROWSTART,COLSTART,ROWEND,COLEND]),
     mozeDaDodje(F,ROWSTART,COLSTART,ROWEND,COLEND).
 /*mozeDaDodje(F,xen,yen,xst,yst)- proverava da li figura F moze da dodje iz (xst,yst) na (xen,yen)*/
 /*kraljica: moze da dodje na neko polje ako to moze lovac ili top */
-mozeDaDodje(X,ROWSTART,COLSTART,ROWEND,COLEND):-format('figura je: ~a\n',[X]),
-    upcase_atom(X,'Q'),
-    mozeDaDodje('B',ROWSTART,COLSTART,ROWEND,COLEND);
-    mozeDaDodje('R',ROWSTART,COLSTART,ROWEND,COLEND).
+mozeDaDodje('q',ROWSTART,COLSTART,ROWEND,COLEND):-
+   	mozeDaDodje('Q',ROWSTART,COLSTART,ROWEND,COLEND).
+mozeDaDodje('Q',ROWSTART,COLSTART,ROWEND,COLEND):-
+	(mozeDaDodje('B',ROWSTART,COLSTART,ROWEND,COLEND);
+    mozeDaDodje('R',ROWSTART,COLSTART,ROWEND,COLEND)).
 /*top: moze da dodje na neko polje ako su vrste ili kolone jednake*/
-mozeDaDodje(X,ROWSTART,COLSTART,ROWEND,COLEND):-
-    upcase_atom(X,'R'),
+mozeDaDodje('r',ROWSTART,COLSTART,ROWEND,COLEND):-
+    mozeDaDodje('R',ROWSTART,COLSTART,ROWEND,COLEND).
+mozeDaDodje('R',ROWSTART,COLSTART,ROWEND,COLEND):-
     (   ROWEND=:=ROWSTART;COLEND=:=COLSTART).
 /*lovac: moze da dodje na neko polje ako su pocetno i startno na istoj dijagonali.
   Neka 2 polja su na istoj dijagonali akko je zbir ili razlika koordinata tih polja jednaka*/
-mozeDaDodje(X,ROWSTART,COLSTART,ROWEND,COLEND):-
-    upcase_atom(X,'B'),
+mozeDaDodje('b',ROWSTART,COLSTART,ROWEND,COLEND):-
+    mozeDaDodje('B',ROWSTART,COLSTART,ROWEND,COLEND).
+mozeDaDodje('B',ROWSTART,COLSTART,ROWEND,COLEND):-
     ZB1 is ROWEND+COLEND,ZB2 is ROWSTART+COLSTART,RAZL1 is ROWEND-COLEND,RAZL2 is ROWSTART-COLSTART,
     (   ZB1=:=ZB2;RAZL1=:=RAZL2).
 /*kralj: moze da dodje na neko polje ako je razlika apsolutnih vresnosti vrsta <=1 (isto vazi i za kolone)*/
-mozeDaDodje(X,ROWSTART,COLSTART,ROWEND,COLEND):-
-    upcase_atom(X,'K'),
+mozeDaDodje('k',ROWSTART,COLSTART,ROWEND,COLEND):-
+    mozeDaDodje('K',ROWSTART,COLSTART,ROWEND,COLEND).
+mozeDaDodje('K',ROWSTART,COLSTART,ROWEND,COLEND):-
     R1 is ROWEND-ROWSTART,R2 is COLEND-COLSTART,
     abs(R1)=<1,abs(R2)=<1.
 /*konj: moze da dodje na neko polje ako je razlika apsloutnih vrednosti vrsta 1, a kolona 2(i obrnuto)*/
-mozeDaDodje(X,ROWSTART,COLSTART,ROWEND,COLEND):-
-    upcase_atom(X,'N'),
+mozeDaDodje('n',ROWSTART,COLSTART,ROWEND,COLEND):-
+    mozeDaDodje('N',ROWSTART,COLSTART,ROWEND,COLEND).
+mozeDaDodje('N',ROWSTART,COLSTART,ROWEND,COLEND):-
     R1 is ROWEND-ROWSTART,R2 is COLEND-COLSTART,
     (   (abs(R1)=:=1,abs(R2)=:=2);(abs(R1)=:=2,abs(R2)=:=1)  ) .
 /*pesak: 2 slucaja:
@@ -115,7 +120,7 @@ mozeDaDodje(X,ROWSTART,COLSTART,ROWEND,COLEND):-
 mozeDaDodje('p',2,X,4,X).
 mozeDaDodje('p',ROWEND,COLEND,ROWSTART,COLSTART):-
     ROWS is ROWEND-1, ROWS=:=ROWSTART, R2 is COLEND-COLSTART,abs(R2)=<1.
-mozeDaDodje('P',7,X,4,X).
+mozeDaDodje('P',7,X,5,X).
 mozeDaDodje('P',ROWEND,COLEND,ROWSTART,COLSTART):-
     ROWS is ROWEND+1, ROWS=:=ROWSTART, R2 is COLEND-COLSTART,abs(R2)=<1.
 /*veliko slovo-upcase_atom(chstari,chnovi).*/ 
@@ -151,14 +156,14 @@ boja(X,1):-downcase_atom(X,X),!.
 boja(_,2).
 %moze se doci figurom od pocetnog do krajnjeg polja-okPotez
 %polja na putu su prazna
-poljaNaPutuSuPrazna(_, _, _, _, _, X):- upcase_atom(X, 'N'), !.
-poljaNaPutuSuPrazna(T, ROWSTART, COLSTART, ROWEND, COLEND, X):- (upcase_atom(X, 'B') ; upcase_atom(X, 'R') ; upcase_atom(X, 'Q')),
+poljaNaPutuSuPrazna(_, _, _, _, _, X):- (   ==(X,'n');==(X,'N')),!.
+poljaNaPutuSuPrazna(T, ROWSTART, COLSTART, ROWEND, COLEND, X):- ( ==(X,'b');==(X,'B') ;  ==(X,'r');==(X,'R') ;  ==(X,'q');==(X,'Q')),
 	    DX is sign(ROWEND - ROWSTART), DY is sign(COLEND - COLSTART), ROWST is ROWSTART+DX,COLST is COLSTART+DY,
     	protrciKrozPut(T,ROWST,COLST, ROWEND, COLEND, DX, DY).
 
 poljaNaPutuSuPrazna(T, 7, COL, 5, COL, 'P'):- nadjiFiguruNaDatojPoziciji(T,6,COL,'O'), !.
 poljaNaPutuSuPrazna(T, 2, COL, 4, COL, 'p'):- nadjiFiguruNaDatojPoziciji(T,3,COL,'O'), !.
-poljaNaPutuSuPrazna(_, RED1, _, RED2, _, X):- abs(RED2-RED1) =:= 1, upcase_atom(X, 'P').
+poljaNaPutuSuPrazna(_, RED1, _, RED2, _, X):- abs(RED2-RED1) =:= 1,( ==(X,'p'),==(X,'P')).
 
 protrciKrozPut(_,X,Y,X,Y,_,_):-!.
 protrciKrozPut(T,ROWCURR,COLCURR,ROWEND,COLEND,DX,DY):-
@@ -180,11 +185,8 @@ daLiJede(T, _, ROWEND, COLEND, S):- not(daLiJeUPotezu('x', S)), nadjiFiguruNaDat
 proveriOgranicenja(LISTAOGRANICENJA,T,F,ROWSTART,COLSTART,ROWEND,COLEND):-
     pocetnoPoljeImaDatuFiguru(T,F,ROWSTART,COLSTART),
     krajnjePoljeNemaFiguruIsteBoje(T,F,ROWEND,COLEND),
+   	%format('dobro pre okpoteza\n'),
     okPotez(F,ROWSTART,COLSTART,ROWEND,COLEND),
-    format('ok potez\n'),
+    %format('ok potez\n'),
     poljaNaPutuSuPrazna(T, ROWSTART, COLSTART, ROWEND, COLEND, F),
     daLiJede(T, F, ROWEND, COLEND, LISTAOGRANICENJA).
-
-
-
-
